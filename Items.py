@@ -1,14 +1,14 @@
 from random import randint
 import typing
 
-DamageInfo = typing.Sequence[int]
-ArgsChecker = typing.Dict[str, typing.Sequence]
-
 NORMAL_DAMAGE_LENGTH = 2
 NORMAL_DAMAGE_TYPE = int
 
+DamageInfo = typing.Sequence[NORMAL_DAMAGE_TYPE]
+ArgsChecker = typing.Dict[str, typing.Sequence]
 
-def real_damage(damage: float, defence: float) -> int:
+
+def real_damage(damage: NORMAL_DAMAGE_TYPE, defence: float) -> int:
     return round(damage-(damage*0.01*defence))
 
 
@@ -16,7 +16,7 @@ class Item:
     arg_types: ArgsChecker = {"name": [str, "raise ValueError(f'Name must be str, got {arg}({type(arg)})')"]}
 
     @staticmethod
-    def check_args(args: typing.Dict[str, typing.Any], arg_types: ArgsChecker):
+    def check_args(args: typing.Dict[str, typing.Any], arg_types: ArgsChecker) -> bool:
         for (arg, normalType) in arg_types.items():
             if not isinstance(args[arg], normalType[0]):
                 exec(normalType[1], {"ValueError": ValueError, "arg": args[arg]})
@@ -33,17 +33,17 @@ class Weapon(Item):
             self._name: str = name
 
     @property
-    def damage(self):
+    def damage(self) -> float:
         return float(randint(self._damage[0], self._damage[1]))
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @staticmethod
-    def check_args(args: typing.Dict[str, typing.Any], arg_types: ArgsChecker):
+    def check_args(args: typing.Dict[str, typing.Any], arg_types: ArgsChecker) -> bool:
         super().check_args(args, arg_types)
-        if any(not isinstance(damageConfig, int) for damageConfig in args["damage"]):
+        if any(not isinstance(damageConfig, NORMAL_DAMAGE_TYPE) for damageConfig in args["damage"]):
             raise ValueError(f"Wrong types in damage: {type(args['damage'])}")
         elif len(args["damage"]) != 2:
             raise ValueError(f"Damage length must be 2, got {len(args['damage'])}")
